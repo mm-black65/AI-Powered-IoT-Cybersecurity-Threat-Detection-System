@@ -225,13 +225,13 @@ pip install -r requirements.txt
 Download the **CICIoT2023 Dataset** and place it inside:
 
 ```
-datasets/raw/
+datasets/
 ```
 
 Example:
 
 ```
-datasets/raw/iot_dataset.csv
+datasets/iot_dataset.csv
 ```
 
 ---
@@ -390,7 +390,6 @@ Returns
 5. Kshitiz Goyal - 250170042
 
 ---
----
 
 # 📄 License
 
@@ -398,5 +397,4 @@ This project is developed for educational and research purposes.
 
 ---
 
-# ⭐ If you found this project useful, consider giving it a star.
 

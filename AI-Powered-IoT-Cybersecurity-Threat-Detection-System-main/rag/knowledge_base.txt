@@ -1,0 +1,86 @@
+DDoS-TCP_Flood
+Description:
+Large number of TCP packets are sent to overwhelm the server.
+
+Severity:
+High
+
+Recommended Actions:
+- Block suspicious IP addresses
+- Enable firewall filtering
+- Limit incoming TCP requests
+- Monitor abnormal traffic spikes
+
+---------------------------------------------------
+
+DDoS-UDP_Flood
+
+Description:
+Massive UDP packets are sent to exhaust bandwidth.
+
+Severity:
+High
+
+Recommended Actions:
+- Enable rate limiting
+- Block malicious sources
+- Filter unnecessary UDP traffic
+
+---------------------------------------------------
+
+DDoS-SYN_Flood
+
+Description:
+Attack sends thousands of SYN packets without completing handshake.
+
+Severity:
+High
+
+Recommended Actions:
+- Enable SYN Cookies
+- Configure Firewall
+- Increase backlog queue
+
+---------------------------------------------------
+
+DDoS-RSTFINFlood
+
+Description:
+RST and FIN packets terminate active connections.
+
+Severity:
+High
+
+Recommended Actions:
+- Ignore suspicious RST packets
+- Monitor connection resets
+- Enable IDS
+
+---------------------------------------------------
+
+DDoS-ICMP_Flood
+
+Description:
+Flood of ICMP Echo Requests.
+
+Severity:
+Medium
+
+Recommended Actions:
+- Limit ICMP traffic
+- Enable firewall filtering
+
+---------------------------------------------------
+
+DDoS-PSHACK_Flood
+
+Description:
+Flood containing PSH and ACK packets.
+
+Severity:
+Medium
+
+Recommended Actions:
+- Inspect TCP sessions
+- Monitor abnormal packet rate
+- Block suspicious hosts

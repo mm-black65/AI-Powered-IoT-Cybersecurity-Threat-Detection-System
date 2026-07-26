@@ -1,159 +1,390 @@
 # 🛡️ AI-Powered IoT Cybersecurity Threat Detection System
 
-An end-to-end intelligent cybersecurity platform that combines **IoT**, **Machine Learning**, **Explainable AI (XAI)**, and **Large Language Models (LLMs)** to detect, explain, and respond to cyber threats targeting IoT devices in real time.
+An intelligent cybersecurity platform that leverages machine learning, retrieval-augmented generation (RAG), and large language models (LLM) to detect and analyze network threats in real-time from IoT devices.
 
-The system continuously monitors telemetry from an **ESP32**, identifies malicious network activity using machine learning, explains every prediction with **SHAP**, and provides human-readable threat analysis and mitigation recommendations through a **Retrieval-Augmented Generation (RAG)** powered AI assistant.
+## 🎯 Features
 
----
+- **Machine Learning Threat Detection**: Random Forest classifier to identify 8 different DDoS attack types
+- **Real-Time Processing**: MQTT-based telemetry ingestion from ESP32 IoT devices
+- **AI-Powered Analysis**: Google Gemini integration for intelligent threat explanations
+- **Knowledge Base**: RAG system with cybersecurity threat documentation
+- **Interactive Dashboard**: Streamlit-based UI for threat monitoring and analytics
+- **SQLite Database**: Persistent storage for predictions and device telemetry
+- **Confidence Scoring**: ML model provides confidence percentages for predictions
+- **Threat Levels**: Automatic threat severity classification (HIGH/MEDIUM/LOW)
 
-# 📌 Overview
+## 📊 Project Architecture
 
-This project demonstrates a complete real-time IoT Intrusion Detection System (IDS) pipeline.
-
-1. **ESP32 Telemetry Collection**
-
-   * The ESP32 continuously publishes device and network telemetry (CPU usage, memory utilization, RSSI, connection statistics, MQTT message rate, etc.) via MQTT.
-
-2. **Real-Time Threat Detection**
-
-   * A Python backend subscribes to MQTT topics and performs live inference using a trained **Random Forest** or **XGBoost** model to classify network behavior as normal or malicious.
-
-3. **Explainable AI**
-
-   * Every prediction is interpreted using **SHAP (SHapley Additive exPlanations)**, highlighting the features that most influenced the model's decision.
-
-4. **LLM-Powered Security Assistant**
-
-   * Alert information and SHAP explanations are passed to a **RAG pipeline**, which retrieves relevant cybersecurity knowledge and generates easy-to-understand explanations, attack descriptions, and mitigation strategies.
-
-5. **Interactive Dashboard**
-
-   * A real-time dashboard visualizes telemetry, attack alerts, prediction confidence, SHAP feature importance, and includes a conversational AI assistant for security analysis.
-
----
-
-# 🏗️ System Architecture
-
-```text
-               ESP32 Device
-          (Live Telemetry Data)
-                    │
-                    ▼
-              MQTT Broker
-                    │
-                    ▼
-            Python Backend
-                    │
-                    ▼
-      Machine Learning Classifier
-      (Random Forest / XGBoost)
-                    │
-        ┌───────────┴───────────┐
-        ▼                       ▼
-   SHAP Explainability     Threat Prediction
-        │                       │
-        └───────────┬───────────┘
-                    ▼
-           RAG Knowledge Retrieval
-                    │
-                    ▼
-           LLM Security Assistant
-                    │
-                    ▼
-          Real-Time Monitoring Dashboard
+```
+┌─────────────┐         ┌──────────────┐         ┌─────────────┐
+│   ESP32     │────────▶│  MQTT Broker │────────▶│  Backend    │
+│  IoT Device │         │(Mosquitto)   │         │  (FastAPI)  │
+└─────────────┘         └──────────────┘         └─────────────┘
+                                                        │
+                                    ┌───────────────────┼───────────────────┐
+                                    │                   │                   │
+                            ┌───────▼──────┐   ┌───────▼──────┐   ┌───────▼──────┐
+                            │       ML      │   │     RAG      │   │     LLM      │
+                            │   (Random     │   │  (Knowledge  │   │   (Gemini)   │
+                            │   Forest)     │   │   Base)      │   │              │
+                            └───────┬──────┘   └──────────────┘   └──────────────┘
+                                    │
+                            ┌───────▼──────────┐
+                            │   SQLite DB      │
+                            │  (Predictions &  │
+                            │   Telemetry)     │
+                            └──────────────────┘
+                                    │
+                            ┌───────▼──────────┐
+                            │  Streamlit       │
+                            │  Dashboard       │
+                            └──────────────────┘
 ```
 
-Cyberattacks are launched from a separate attacker machine using tools such as **hping3**, **nmap**, and custom MQTT flooding scripts. The ESP32 requires no attack-specific firmware—it behaves as a standard network-connected IoT device, making the evaluation representative of real-world deployments.
+## 🏗️ Project Structure
 
----
-
-# ⚙️ Tech Stack
-
-| Layer                 | Technologies                                                     |
-| --------------------- | ---------------------------------------------------------------- |
-| **Edge Device**       | ESP32, Arduino Framework, PlatformIO                             |
-| **Messaging**         | MQTT (Mosquitto), Paho MQTT                                      |
-| **Machine Learning**  | Python, Pandas, NumPy, Scikit-learn, XGBoost                     |
-| **Explainable AI**    | SHAP                                                             |
-| **RAG Pipeline**      | LangChain / LlamaIndex, ChromaDB or FAISS, Sentence Transformers |
-| **LLM**               | OpenAI API / Anthropic API                                       |
-| **Backend**           | FastAPI or Flask                                                 |
-| **Dashboard**         | Streamlit (or React)                                             |
-| **Attack Simulation** | hping3, Nmap, Aireplay-ng (optional), Custom MQTT attack scripts |
-
----
-
-# 📊 Dataset
-
-The detection models are trained using the **CICIoT2023** dataset, a comprehensive public benchmark for IoT intrusion detection.
-
-### Attack Categories
-
-* DDoS
-* DoS
-* Reconnaissance
-* Spoofing
-* Brute Force
-* Web-Based Attacks
-* Mirai Botnet
-
-The dataset contains **33 attack types** grouped into **7 major categories**, enabling the model to learn diverse real-world attack patterns.
-
----
-
-# 📁 Project Structure
-
-```text
-AI-IoT-Cybersecurity/
+```
+├── backend/                    # FastAPI REST API & Core Services
+│   ├── main.py                # FastAPI app entry point
+│   ├── routes.py              # API endpoints
+│   ├── models.py              # Pydantic models
+│   ├── ml_service.py          # ML prediction engine
+│   ├── llm_service.py         # Gemini LLM integration
+│   ├── database.py            # SQLite operations
+│   ├── mqtt.py                # MQTT listener
+│   ├── feature_mapper.py       # Telemetry-to-ML conversion
+│   ├── predict_models.py       # Threat feature model
+│   └── README.md
 │
-├── firmware/              # ESP32 firmware
-├── attacks/               # Attack simulation scripts
-├── dataset/               # CICIoT2023 dataset
+├── ml/                         # Machine Learning Pipeline
+│   ├── train.py               # Model training (Random Forest)
+│   ├── predict.py             # Standalone prediction
+│   ├── explore.py             # Dataset exploration
+│   ├── preprocess.py          # Data preprocessing (placeholder)
+│   ├── explain.py             # Model explainability (placeholder)
+│   ├── datasets_loader.py      # Dataset utilities (placeholder)
+│   ├── model.pkl              # Trained model artifact
+│   ├── label_encoder.pkl      # Label encoder
+│   └── README.md
 │
-├── ml/
-│   ├── preprocess.py
-│   ├── train_rf.py
-│   ├── train_xgb.py
-│   └── evaluate.py
+├── rag/                        # Retrieval-Augmented Generation
+│   ├── rag_service.py         # Knowledge base retrieval
+│   ├── retrieve.py            # Advanced retrieval (placeholder)
+│   ├── build_index.py         # Indexing engine (placeholder)
+│   ├── knowledge_base.txt      # Cybersecurity documentation
+│   └── README.md
 │
-├── backend/
-│   ├── mqtt_listener.py
-│   ├── predictor.py
-│   └── explainer.py
+├── dashboard/                  # Web UI & Visualization
+│   ├── app.py                 # Streamlit dashboard
+│   └── README.md
 │
-├── rag/
-│   ├── knowledge_base/
-│   ├── embed_store.py
-│   └── assistant.py
+├── esp32/                      # IoT Device Firmware
+│   ├── main.cpp               # Arduino/ESP32 firmware
+│   └── README.md
 │
-├── dashboard/
+├── models/                     # Model Artifacts
+│   ├── random_forest.pkl
+│   ├── label_encoder.pkl
+│   ├── feature_names.pkl
+│   └── README.md
 │
-└── README.md
+├── datasets/                   # Data Assets
+│   └── raw/
+│       └── iot_dataset.csv    # Training dataset (43 features)
+│
+├── tests/                      # Test Suite
+│   ├── test_predict.py        # ML prediction tests
+│   ├── test_rag.py            # RAG retrieval tests
+│   ├── test_mapper.py         # Feature mapping tests
+│   ├── test_mqtt_publish.py   # MQTT tests
+│   └── test_gemini.py         # LLM integration tests
+│
+├── docs/                       # Documentation
+├── requirements.txt            # Python dependencies
+└── README.md                   # This file
 ```
 
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.8+
+- Mosquitto MQTT broker
+- Google Gemini API key
+- ESP32 microcontroller (optional, for live device data)
+
+### 1. Installation
+
+```bash
+# Clone repository
+git clone <repo-url>
+cd AI-Powered-IoT-Cybersecurity-Threat-Detection-System-main
+
+# Create virtual environment
+python -m venv venv
+source venv/bin/activate  # On Windows: venv\Scripts\activate
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+### 2. Configuration
+
+Create a `.env` file in the project root:
+```env
+GEMINI_API_KEY=your_api_key_here
+```
+
+### 3. Setup MQTT Broker (Optional for ESP32)
+
+```bash
+# Install Mosquitto
+# Ubuntu/Debian: sudo apt-get install mosquitto mosquitto-clients
+# macOS: brew install mosquitto
+# Windows: Download from mosquitto.org
+
+# Start broker
+mosquitto
+# Or: mosquitto -c /etc/mosquitto/mosquitto.conf
+```
+
+### 4. Train ML Model (if needed)
+
+```bash
+cd ml
+python train.py
+# This generates: ../models/random_forest.pkl, label_encoder.pkl, feature_names.pkl
+```
+
+### 5. Run Backend API
+
+```bash
+cd backend
+uvicorn main:app --reload --port 8000
+# API available at: http://127.0.0.1:8000/docs (Swagger UI)
+```
+
+### 6. Start Dashboard
+
+```bash
+cd dashboard
+streamlit run app.py
+# Dashboard available at: http://localhost:8501
+```
+
+### 7. (Optional) Start MQTT Listener
+
+```bash
+cd backend
+python mqtt.py
+# Listens for ESP32 telemetry on iot/device01/telemetry
+```
+
+## 📡 API Endpoints
+
+### `POST /device-data`
+Receive IoT device telemetry.
+```json
+{
+  "device_id": "ESP32_001",
+  "temperature": 28.5,
+  "cpu_usage": 45.2,
+  "packet_rate": 150,
+  "failed_login": 2,
+  "wifi_signal": -58
+}
+```
+
+### `POST /predict-threat`
+Predict threats from network features.
+```json
+{
+  "flow_duration": 0,
+  "Header_Length": 54,
+  "Protocol Type": 6,
+  ...
+  "Weight": 141.55
+}
+```
+
+**Response:**
+```json
+{
+  "prediction": "DDoS-TCP_Flood",
+  "confidence": 99.96,
+  "threat_level": "HIGH",
+  "rag_information": "...",
+  "ai_analysis": "..."
+}
+```
+
+## 🤖 Detected Threats
+
+| Attack Type | Severity | Description |
+|-------------|----------|-------------|
+| DDoS-TCP_Flood | HIGH | Overwhelming TCP packets |
+| DDoS-UDP_Flood | HIGH | Massive UDP packet flooding |
+| DDoS-SYN_Flood | HIGH | SYN packet flood attack |
+| DDoS-RSTFINFlood | HIGH | RST/FIN packet termination |
+| DDoS-ICMP_Flood | MEDIUM | ICMP echo request flood |
+| DDoS-PSHACK_Flood | MEDIUM | PSH/ACK packet flood |
+| Benign | LOW | Normal traffic |
+
+## 🧠 Machine Learning Model
+
+- **Algorithm**: Random Forest Classifier (150 estimators)
+- **Features**: 43 network traffic metrics
+- **Classes**: 8 (7 attack types + benign)
+- **Training**: 80/20 train-test split
+- **Framework**: scikit-learn
+
+### Key Features:
+- Flow duration, packet rates, protocol types
+- TCP/UDP flags (SYN, ACK, FIN, RST, etc.)
+- Packet statistics (min, max, average, std)
+- IP and LLC protocol detection
+
+## 🔍 RAG System
+
+Knowledge base includes:
+- Attack descriptions and severity levels
+- Recommended mitigation strategies
+- Cybersecurity context for IoT threat response
+
+## 💬 LLM Integration
+
+The backend uses Google Gemini to generate human-readable security analysis for detected threats. The LLM output explains the attack, severity, and recommended actions.
+
+## 🧪 Testing
+
+Run project tests from the repository root:
+```bash
+pytest -q
+```
+
+## 📦 Requirements
+
+Install dependencies with:
+```bash
+pip install -r requirements.txt
+```
+
+## 🛠️ Notes
+
+- The project integrates ESP32 telemetry, MQTT ingestion, ML threat classification, RAG retrieval, and LLM analysis.
+- Core components are implemented and available for end-to-end operation with proper configuration.
+
+## 💬 LLM Integration
+
+Google Gemini generates professional security analysis including:
+1. What attack is happening
+2. Why it's dangerous
+3. Severity assessment
+4. Recommended mitigation steps
+5. Action urgency for administrators
+
+## 📊 Dashboard Features
+
+- **Real-time threat statistics** (HIGH/MEDIUM/LOW counts)
+- **Device telemetry display** (temperature, CPU, WiFi signal)
+- **Latest threat detection** (prediction, confidence, level)
+- **AI Security Report generation**
+- **Historical threat visualization**
+- **Backend connectivity status**
+- **Auto-refresh** (5-second intervals)
+
+## 🧪 Testing
+
+Run individual tests:
+```bash
+python tests/test_predict.py
+python tests/test_rag.py
+python tests/test_mapper.py
+python tests/test_mqtt_publish.py
+python tests/test_gemini.py
+```
+
+## ⚙️ Configuration Files
+
+### Backend Configuration
+- MQTT Broker: `localhost:1883`
+- FastAPI Port: `8000`
+- Database: `iot_security.db` (SQLite)
+
+### ESP32 Configuration (in main.cpp)
+- WiFi credentials required
+- MQTT broker IP: `192.168.1.100` (update with your PC IP)
+- Telemetry topic: `iot/device01/telemetry`
+
+## 🔧 Troubleshooting
+
+### Backend Won't Start
+- Ensure port 8000 is not in use: `netstat -ano | findstr :8000`
+- Check virtual environment is activated
+- Verify dependencies are installed
+
+### MQTT Connection Failed
+- Start Mosquitto: `mosquitto`
+- Check MQTT broker IP in `src/main.cpp`
+- Ensure ESP32 can reach the broker
+
+### Dashboard Not Loading
+- Check Streamlit is installed: `pip install streamlit`
+- Backend must be running
+- Clear Streamlit cache: `streamlit cache clear`
+
+### ML Model Errors
+- Verify model files exist in `models/`
+- Check feature order matches `feature_names.pkl`
+- Retrain if model is corrupted: `python ml/train.py`
+
+## 📝 What's Left (To-Do)
+
+### Critical
+- [ ] Fix `requirements.txt` encoding
+- [ ] Complete `dashboard/app.py` implementation
+- [ ] Complete `esp32/main.cpp` loop function
+- [ ] Fix `test_gemini.py` missing parameter
+- [ ] Add `.env` configuration file
+
+### Important
+- [ ] Setup MQTT broker
+- [ ] Enhance feature mapping for real telemetry
+- [ ] Add integration tests
+- [ ] Complete subdirectory READMEs
+
+### Optional
+- [ ] Implement data preprocessing utilities
+- [ ] Add model explainability (SHAP/LIME)
+- [ ] Implement semantic search with embeddings
+- [ ] Docker containerization
+- [ ] Comprehensive logging system
+
+## 📚 Documentation
+
+- [Backend README](backend/README.md) - API & Services
+- [ML README](ml/README.md) - Model Training & Evaluation
+- [RAG README](rag/README.md) - Knowledge Base System
+- [ESP32 README](esp32/README.md) - Device Firmware
+- [Dashboard README](dashboard/README.md) - UI Components
+
+## 🤝 Contributing
+
+1. Fork the repository
+2. Create a feature branch: `git checkout -b feature/your-feature`
+3. Commit changes: `git commit -m 'Add feature'`
+4. Push to branch: `git push origin feature/your-feature`
+5. Create Pull Request
+
+## 📄 License
+
+MIT License
+
+## 👥 Authors
+
+1. Mahi Ahalawat - 2501270021
+2. Aishni Rathore - 2501270009
+3. Govind Agarwal - 2501270026
+4. Yashika Naryani - 2501270027
+5. Kshitiz Goyal - 250170042
+
 ---
-
-# 🚀 Workflow
-
-1. Flash the firmware to the ESP32 and connect it to Wi-Fi.
-2. Start the Mosquitto MQTT broker.
-3. Train the intrusion detection model.
-4. Launch the backend MQTT listener.
-5. Start the monitoring dashboard.
-6. Simulate network attacks from a separate machine.
-7. Observe live attack detection, SHAP explanations, and AI-generated mitigation recommendations in real time.
-
----
-
-# ✨ Key Features
-
-* Real-time IoT telemetry monitoring
-* Machine Learning–based intrusion detection
-* Support for multiple cyberattack categories
-* Explainable AI using SHAP
-* Retrieval-Augmented Generation (RAG) for contextual security guidance
-* LLM-powered cybersecurity assistant
-* Interactive real-time dashboard
-* MQTT-based communication architecture
-* Modular and scalable project design
-* Easily extensible to additional IoT devices and security datasets

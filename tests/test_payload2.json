@@ -1,0 +1,10 @@
+{
+    "temperature": 45.0,
+    "humidity": 70,
+    "cpu_usage": 75,
+    "wifi_signal": -75,
+    "packet_rate": 800,
+    "failed_login": 8,
+    "heap": 3000000,
+    "uptime": 15000
+}

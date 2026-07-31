@@ -1,11 +1,11 @@
 import sqlite3
+import os
 
 DATABASE_NAME = "iot_security.db"
 
-
 def get_connection():
-    conn = sqlite3.connect(DATABASE_NAME)
-    return conn
+    print("Using database:", os.path.abspath(DATABASE_NAME))
+    return sqlite3.connect(DATABASE_NAME)
 
 
 def create_table():
@@ -42,13 +42,14 @@ def create_prediction_table():
         prediction TEXT,
         confidence REAL,
         threat_level TEXT,
+        rag_information TEXT,
+        ai_analysis TEXT,
         timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
     )
     """)
 
     conn.commit()
     conn.close()
-
 
 def insert_device_data(data):
     conn = get_connection()
@@ -84,7 +85,13 @@ def insert_device_data(data):
     conn.close()
 
 
-def insert_prediction(prediction, confidence, threat_level):
+def insert_prediction(
+    prediction,
+    confidence,
+    threat_level,
+    rag_information="",
+    ai_analysis=""
+):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -93,13 +100,17 @@ def insert_prediction(prediction, confidence, threat_level):
     (
         prediction,
         confidence,
-        threat_level
+        threat_level,
+        rag_information,
+        ai_analysis
     )
-    VALUES (?, ?, ?)
+    VALUES (?, ?, ?, ?, ?)
     """, (
         prediction,
         confidence,
-        threat_level
+        threat_level,
+        rag_information,
+        ai_analysis
     ))
 
     conn.commit()

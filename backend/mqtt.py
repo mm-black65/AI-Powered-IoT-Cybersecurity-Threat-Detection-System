@@ -3,7 +3,7 @@ import sqlite3
 import requests
 import paho.mqtt.client as mqtt
 
-from feature_mapper import telemetry_to_ml_features
+from backend.feature_mapper import telemetry_to_ml_features
 
 # ==========================================================
 # Configuration
@@ -43,14 +43,16 @@ def init_db():
     """)
 
     cur.execute("""
-        CREATE TABLE IF NOT EXISTS predictions (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            prediction TEXT,
-            confidence REAL,
-            threat_level TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )
-    """)
+    CREATE TABLE IF NOT EXISTS predictions (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        prediction TEXT,
+        confidence REAL,
+        threat_level TEXT,
+        rag_information TEXT,
+        ai_analysis TEXT,
+        timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
+    )
+""")
 
     conn.commit()
     conn.close()
@@ -78,13 +80,13 @@ def save_telemetry(telemetry: dict):
     conn.close()
 
 
-def save_prediction(prediction: str, confidence: float, threat_level: str):
+def save_prediction(prediction: str, confidence: float, threat_level: str, rag_information: str = "", ai_analysis: str = ""):
     conn = sqlite3.connect(DB_PATH)
     cur = conn.cursor()
     cur.execute("""
-        INSERT INTO predictions (prediction, confidence, threat_level)
-        VALUES (?, ?, ?)
-    """, (prediction, confidence, threat_level))
+        INSERT INTO predictions (prediction, confidence, threat_level, rag_information, ai_analysis)
+        VALUES (?, ?, ?, ?, ?)
+    """, (prediction, confidence, threat_level, rag_information, ai_analysis))
     conn.commit()
     conn.close()
 
@@ -153,8 +155,9 @@ def on_message(client, userdata, msg):
             result["prediction"],
             result["confidence"],
             result["threat_level"],
+            result.get("rag_information", ""),
+            result.get("ai_analysis", ""),
         )
-
         if "rag_information" in result:
             print("\nRAG INFORMATION")
             print("------------------------------------------")

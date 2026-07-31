@@ -17,7 +17,6 @@ def generate_security_analysis(
     telemetry,
     rag_information
 ):
-
     prompt = f"""
 You are an AI Cybersecurity Expert.
 
@@ -33,19 +32,16 @@ Live Device Data:
 Knowledge Base Information:
 {rag_information}
 
-Using ONLY the above information,
-
 Explain:
-
 1. What attack is happening?
 2. Why is it dangerous?
 3. How severe is it?
 4. Recommended mitigation.
 5. Should the administrator take immediate action?
-
-Keep the answer professional but easy to understand.
 """
 
-    response = model.generate_content(prompt)
-
-    return response.text
+    try:
+        response = model.generate_content(prompt)
+        return response.text
+    except Exception as e:
+        return f"Gemini Error: {str(e)}"

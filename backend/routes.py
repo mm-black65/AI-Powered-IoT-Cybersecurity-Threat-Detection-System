@@ -31,43 +31,42 @@ def receive_device_data(data: DeviceData):
 @router.post("/predict-threat")
 def predict_threat(data: ThreatFeatures):
 
-    # Demo telemetry (later this will come from ESP32)
     telemetry = get_latest_device_data()
+
     if telemetry is None:
         telemetry = {
-        "temperature": 0,
-        "cpu_usage": 0,
-        "packet_rate": 0,
-        "failed_login": 0,
-        "wifi_signal": 0
-    }
+            "temperature": 0,
+            "cpu_usage": 0,
+            "packet_rate": 0,
+            "failed_login": 0,
+            "wifi_signal": 0
+        }
 
-    # ML Prediction
-    result = predict_attack(
-        data.model_dump(by_alias=True)
-    )
+    result = predict_attack(data.model_dump(by_alias=True))
 
-    # Save prediction into database
+    try:
+        rag_information = retrieve_information(result["prediction"])
+    except Exception as e:
+        rag_information = f"RAG Error: {e}"
+
+    try:
+        ai_analysis = generate_security_analysis(
+            result["prediction"],
+            result["confidence"],
+            telemetry,
+            rag_information
+        )
+    except Exception as e:
+        ai_analysis = f"Gemini Error: {e}"
+
     insert_prediction(
-        result["prediction"],
-        result["confidence"],
-        result["threat_level"]
+        prediction=result["prediction"],
+        confidence=result["confidence"],
+        threat_level=result["threat_level"],
+        rag_information=rag_information,
+        ai_analysis=ai_analysis
     )
 
-    # Retrieve cybersecurity knowledge (RAG)
-    rag_information = retrieve_information(
-        result["prediction"]
-    )
-
-    # Generate AI explanation using RAG
-    ai_analysis = generate_security_analysis(
-        result["prediction"],
-        result["confidence"],
-        telemetry,
-        rag_information
-    )
-
-    # Return everything
     return {
         "prediction": result["prediction"],
         "confidence": result["confidence"],
